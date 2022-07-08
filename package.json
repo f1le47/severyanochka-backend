@@ -1,0 +1,8 @@
+{
+  "name": "severyanochka-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/f1le47/severyanochka-backend.git",
+  "author": "f1le47 <ospischeff@gmail.com>",
+  "license": "MIT"
+}

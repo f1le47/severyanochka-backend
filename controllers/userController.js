@@ -80,12 +80,12 @@ class UserController {
     const { phoneNumber, password } = req.body;
 
     if (!phoneNumber || !password) {
-      return next(new ApiError.badRequest('Некорректный номер или пароль'));
+      return next(ApiError.badRequest('Некорректный номер или пароль'));
     }
 
     const user = await User.findOne({ where: { phoneNumber } });
     if (!user) {
-      return next(new ApiError.internal('Такого пользователя не существует.'));
+      return next(ApiError.internal('Такого пользователя не существует.'));
     }
 
     const comparePassword = bcrypt.compareSync(password, user.password);
@@ -112,12 +112,12 @@ class UserController {
 
     const { phoneNumber } = req.body;
     if (!phoneNumber) {
-      return next(new ApiError.badRequest('Некорректный номер'));
+      return next(ApiError.badRequest('Некорректный номер'));
     }
 
     const user = await User.findOne({ where: { phoneNumber } });
     if (!user) {
-      return next(new ApiError.internal('Такого пользователя не существует.'));
+      return next(ApiError.internal('Такого пользователя не существует.'));
     }
 
     const code = randomInteger(1000, 9999);
@@ -140,10 +140,36 @@ class UserController {
     const hashPassword = await bcrypt.hash(password, 5);
     await user.update({ password: hashPassword });
 
-    return res.status(200).json({message: 'Пароль успешно изменен.'})
+    return res.status(200).json({ message: 'Пароль успешно изменен.' });
   }
 
-  async check(req, res, next) {}
+  async check(req, res, next) {
+    const token = req.headers.authorization.split(' ')[1];
+    if (!token) {
+      return next(ApiError.badRequest('Не авторизован.'));
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    const user = await User.findOne({ where: { phoneNumber: decoded.phoneNumber } });
+    if (!user) {
+      return next(ApiError.badRequest('Такого пользователя не существует.'));
+    }
+
+    return res.json({
+      user: {
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        surname: user.surname,
+        birthday: user.birthday,
+        region: user.region,
+        city: user.city,
+        gender: user.gender,
+        role: user.role,
+        isActivated: user.isActivated,
+      },
+    });
+  }
 }
 
 module.exports = new UserController();

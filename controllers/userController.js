@@ -2,32 +2,29 @@ const { User } = require('../models/models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const ApiError = require('../errors/ApiError');
+const formattingPhoneNumber = require('../commons/formattingPhoneNumber');
+const creatingActivationCode = require('../commons/creatingActivationCode');
 
 class UserController {
   async registration(req, res, next) {
     const { phoneNumber, surname, name, password, birthday, region, city, gender } = req.body;
 
-    console.log(req.body);
-
-    // function for creating activation code
-    function randomInteger(min, max) {
-      let rand = min - 0.5 + Math.random() * (max - min + 1);
-      return Math.round(rand);
-    }
-
     if (!phoneNumber || !password) {
       return next(ApiError.badRequest('Некорректный номер телефона или пароль.'));
     }
-    const candidate = await User.findOne({ where: { phoneNumber } });
+
+    const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
+
+    const candidate = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
     if (candidate) {
       return next(
         ApiError.badRequest('Пользователь по такому номеру телефона уже зарегестрирован.'),
       );
     }
     const hashPassword = await bcrypt.hash(password, 5);
-    const activationCode = randomInteger(1000, 9999);
+    const activationCode = creatingActivationCode();
     await User.create({
-      phoneNumber,
+      phoneNumber: formattedPhoneNumber,
       name,
       password: hashPassword,
       surname,
@@ -48,17 +45,14 @@ class UserController {
       return next(ApiError.badRequest('Введите номер телефона.'));
     }
 
-    let formattedNumber;
-    if (phoneNumber[0] === '+') {
-      formattedNumber = phoneNumber.slice(1);
-    } else if (phoneNumber[0] === '8') {
-      formattedNumber = '7' + phoneNumber.slice(1);
-    }
+    const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
 
-    const user = await User.findOne({ where: { phoneNumber: formattedNumber } });
+    const user = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
     if (!user) {
       return next(ApiError.badRequest('Такого пользователя не существует.'));
     }
+    const newCode = creatingActivationCode();
+    await user.update({ activationCode: newCode, isActivated: false });
 
     const code = user.activationCode;
 
@@ -80,7 +74,9 @@ class UserController {
       return next(ApiError.badRequest('Введите код.'));
     }
 
-    const user = await User.findOne({ where: { phoneNumber } });
+    const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
+
+    const user = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
 
     if (!user) {
       return next(ApiError.badRequest('Такого пользователя не существует.'));
@@ -115,7 +111,9 @@ class UserController {
       return next(ApiError.badRequest('Некорректный номер или пароль'));
     }
 
-    const user = await User.findOne({ where: { phoneNumber } });
+    const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
+
+    const user = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
     if (!user) {
       return next(ApiError.internal('Такого пользователя не существует.'));
     }
@@ -136,24 +134,32 @@ class UserController {
   }
 
   async restorePassword(req, res, next) {
-    // function for creating activation code
-    function randomInteger(min, max) {
-      let rand = min - 0.5 + Math.random() * (max - min + 1);
-      return Math.round(rand);
-    }
-
     const { phoneNumber } = req.body;
     if (!phoneNumber) {
       return next(ApiError.badRequest('Некорректный номер'));
     }
 
-    const user = await User.findOne({ where: { phoneNumber } });
+    const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
+
+    const user = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
     if (!user) {
       return next(ApiError.internal('Такого пользователя не существует.'));
     }
 
-    const code = randomInteger(1000, 9999);
-    await user.update({ activationCode: code, isActivated: false });
+    const newCode = creatingActivationCode();
+    await user.update({ activationCode: newCode, isActivated: false });
+
+    const code = user.activationCode;
+
+    const result = await fetch(
+      `https://${process.env.SMSAERO_EMAIL}:${process.env.SMSAERO_APIKEY}@gate.smsaero.ru/v2/sms/send?number=${user.phoneNumber}&text=${code}&sign=Severyanochka`,
+    );
+
+    if (result.data.success === true) {
+      return res.json({ message: 'Код успешно отправлен.' });
+    } else if (result.data.sucess === false) {
+      return next(ApiError.internal('Что-то пошло не так. Повторите через несколько минут.'));
+    }
 
     return res.status(200).json({ message: 'Код отправлен по номеру телефона.' });
   }
@@ -164,7 +170,9 @@ class UserController {
       return next(ApiError.badRequest('Некорректный пароль.'));
     }
 
-    const user = await User.findOne({ where: { phoneNumber } });
+    const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
+
+    const user = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
     if (!user) {
       return next(ApiError.badRequest('Такого пользователя не существует.'));
     }

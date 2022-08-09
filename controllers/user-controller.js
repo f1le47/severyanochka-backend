@@ -62,13 +62,13 @@ class UserController {
         return next(ApiError.badRequest('Некорректный номер или пароль'));
       }
 
-      const result = await UserService.login(phoneNumber, password);
+      const tokens = await UserService.login(phoneNumber, password);
 
-      res.cookie('refreshToken', result.refreshToken, {
+      res.cookie('refreshToken', tokens.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
-      return res.json({ accessToken: result.accessToken });
+      return res.json({ accessToken: tokens.accessToken });
     } catch (e) {
       next(e);
     }

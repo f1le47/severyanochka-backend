@@ -92,7 +92,10 @@ class UserService {
       throw ApiError.badRequest('Указан неверный пароль');
     }
 
-    return TokenService.generateTokens(new UserDto(user));
+    const userDto = new UserDto(user);
+    const tokens = TokenService.generateTokens({ ...userDto });
+
+    return tokens;
   }
 
   async restorePassword(phoneNumber) {
@@ -149,7 +152,7 @@ class UserService {
   refresh(refreshToken) {
     try {
       const userDto = TokenService.validateRefreshToken(refreshToken);
-      const tokens = TokenService.generateTokens(userDto);
+      const tokens = TokenService.generateTokens({ ...userDto });
 
       return tokens;
     } catch (e) {

@@ -28,15 +28,19 @@ class UserController {
   }
 
   async confirmCode(req, res, next) {
-    const { phoneNumber, code } = req.body;
+    try {
+      const { phoneNumber, code } = req.body;
 
-    if (!code || !phoneNumber) {
-      return next(ApiError.badRequest('Введите код'));
+      if (!code || !phoneNumber) {
+        return next(ApiError.badRequest('Введите код'));
+      }
+
+      await UserService.confirmCode(phoneNumber, code);
+
+      return res.json({ message: 'Код успешно подтвержден' });
+    } catch (e) {
+      next(e);
     }
-
-    await UserService.confirmActivationCode(phoneNumber, code);
-
-    return res.json({ message: 'Код успешно подтвержден' });
   }
 
   async resendCode(req, res, next) {
@@ -77,6 +81,7 @@ class UserController {
   async logout(req, res, next) {
     try {
       res.clearCookie('refreshToken');
+      return res.json('Успешно');
     } catch (e) {
       next(e);
     }
@@ -104,7 +109,7 @@ class UserController {
         return next(ApiError.badRequest('Некорректный пароль'));
       }
 
-      UserService.newPassword(phoneNumber, password);
+      await UserService.newPassword(phoneNumber, password);
 
       return res.json({ message: 'Пароль успешно изменен' });
     } catch (e) {
@@ -127,7 +132,7 @@ class UserController {
         return next(ApiError.unauthorized());
       }
 
-      const user = UserService.checkAuth(token);
+      const user = await UserService.checkAuth(token);
 
       return res.json({
         user: {
@@ -150,6 +155,10 @@ class UserController {
   refresh(req, res, next) {
     try {
       const { refreshToken } = req.cookie;
+
+      if (!refreshToken) {
+        return next(ApiError.unauthorized());
+      }
 
       const tokens = UserService.refresh(refreshToken);
 

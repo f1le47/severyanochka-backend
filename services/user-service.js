@@ -62,7 +62,7 @@ class UserService {
     }
   }
 
-  async confirmActivationCode(phoneNumber, code) {
+  async confirmCode(phoneNumber, code) {
     const formattedPhoneNumber = formattingPhoneNumber(phoneNumber);
 
     const user = await User.findOne({ where: { phoneNumber: formattedPhoneNumber } });
@@ -73,7 +73,7 @@ class UserService {
     if (user.isActivated === true) {
       throw ApiError.badRequest('Код уже подтвержден');
     }
-    if (user.activationCode !== code) {
+    if (user.activationCode !== Number(code)) {
       throw ApiError.badRequest('Неверный код');
     }
 
@@ -136,7 +136,6 @@ class UserService {
 
   async checkAuth(accessToken) {
     const decoded = TokenService.validateAccessToken(accessToken);
-
     if (!decoded) {
       throw ApiError.unauthorized('Access token не валиден');
     }
@@ -149,15 +148,15 @@ class UserService {
     return user;
   }
 
-  refresh(refreshToken) {
-    try {
-      const userDto = TokenService.validateRefreshToken(refreshToken);
-      const tokens = TokenService.generateTokens({ ...userDto });
-
-      return tokens;
-    } catch (e) {
+  async refresh(refreshToken) {
+    const decoded = TokenService.validateRefreshToken(refreshToken);
+    if (!decoded) {
       throw ApiError.unauthorized('Refresh token не валиден');
     }
+
+    const tokens = TokenService.generateTokens({ ...decoded });
+
+    return tokens;
   }
 }
 

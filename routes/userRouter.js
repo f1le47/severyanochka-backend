@@ -10,5 +10,6 @@ router.get('/logout', userController.logout);
 router.post('/restore', userController.restorePassword);
 router.post('/new-password', userController.newPassword);
 router.get('/auth', userController.checkAuth);
+router.get('/refresh', userController.refresh);
 
 module.exports = router;

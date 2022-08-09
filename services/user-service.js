@@ -56,12 +56,10 @@ class UserService {
     const code = user.activationCode;
 
     try {
-      await HttpRequests.sendMessage(formattedPhoneNumber, code)
-    } catch(e) {
-      throw ApiError.internal()
+      await HttpRequests.sendMessage(formattedPhoneNumber, code);
+    } catch (e) {
+      throw ApiError.internal();
     }
-
-    
   }
 
   async confirmActivationCode(phoneNumber, code) {
@@ -134,17 +132,29 @@ class UserService {
   }
 
   async checkAuth(accessToken) {
-    const decoded = jwt.verify(accessToken, process.env.SECRET_KEY);
+    const decoded = TokenService.validateAccessToken(accessToken);
+
     if (!decoded) {
-      throw ApiError.unauthorized('Токен просрочен');
+      throw ApiError.unauthorized('Access token не валиден');
     }
 
     const user = await User.findOne({ where: { phoneNumber: decoded.phoneNumber } });
     if (!user) {
-      return next(ApiError.badRequest('Такого пользователя не существует'));
+      return next(ApiError.badRequest('Пользователя с таким телефоном не существует'));
     }
 
     return user;
+  }
+
+  refresh(refreshToken) {
+    try {
+      const userDto = TokenService.validateRefreshToken(refreshToken);
+      const tokens = TokenService.generateTokens(userDto);
+
+      return tokens;
+    } catch (e) {
+      throw ApiError.unauthorized('Refresh token не валиден');
+    }
   }
 }
 

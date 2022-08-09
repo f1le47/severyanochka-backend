@@ -74,6 +74,14 @@ class UserController {
     }
   }
 
+  async logout(req, res, next) {
+    try {
+      res.clearCookie('refreshToken');
+    } catch (e) {
+      next(e);
+    }
+  }
+
   async restorePassword(req, res, next) {
     try {
       const { phoneNumber } = req.body;
@@ -134,6 +142,22 @@ class UserController {
           isActivated: user.isActivated,
         },
       });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  refresh(req, res, next) {
+    try {
+      const { refreshToken } = req.cookie;
+
+      const tokens = UserService.refresh(refreshToken);
+
+      res.cookie('refreshToken', tokens.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      return res.json({ accessToken: tokens.accessToken });
     } catch (e) {
       next(e);
     }

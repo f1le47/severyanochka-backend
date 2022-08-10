@@ -72,7 +72,7 @@ class UserController {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
-      return res.json({ accessToken: tokens.accessToken });
+      return res.json({ accessToken: tokens.accessToken, message: 'Успешно авторизован' });
     } catch (e) {
       next(e);
     }

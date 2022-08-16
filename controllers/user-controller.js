@@ -81,7 +81,7 @@ class UserController {
   async logout(req, res, next) {
     try {
       res.clearCookie('refreshToken');
-      return res.json('Успешно');
+      return res.json({ message: 'Успешно' });
     } catch (e) {
       next(e);
     }

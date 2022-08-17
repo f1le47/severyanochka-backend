@@ -20,6 +20,7 @@ class ProductService {
       brand: brand.name,
       category: category.name,
       rating: product.rating,
+      img: product.img,
     });
 
     return { ...productDto };
@@ -89,10 +90,6 @@ class ProductService {
       throw ApiError.badRequest('Продукты еще не добавлены');
     }
 
-    const awwew = () => {
-      console.log('sss');
-    };
-
     const fullProducts = [];
     for (const product of products) {
       const brand = await Brand.findOne({ where: { id: product.brandId } });
@@ -105,6 +102,7 @@ class ProductService {
         price_with_card: product.price_with_card,
         weight: product.weight,
         brand: brand.name,
+        img: product.img,
         category: category.name,
         rating: product.rating,
       });

@@ -1,5 +1,6 @@
 const ApiError = require('../errors/ApiError');
 const { Product, Brand, Rating, Category } = require('../models/models');
+const ProductDto = require('../dtos/product-dto');
 
 class ProductService {
   async getProduct(id) {
@@ -7,11 +8,10 @@ class ProductService {
     if (!product) {
       throw ApiError.badRequest('Продукта с таким ID не существует');
     }
-
     const brand = await Brand.findOne({ where: { id: product.brandId } });
     const category = await Category.findOne({ where: { id: product.categoryId } });
 
-    const fullProduct = {
+    const productDto = new ProductDto({
       id: product.id,
       name: product.name,
       price: product.price,
@@ -20,9 +20,9 @@ class ProductService {
       brand: brand.name,
       category: category.name,
       rating: product.rating,
-    };
+    });
 
-    return fullProduct;
+    return { ...productDto };
   }
 
   async addProduct({ price, name, priceWithCard, weight, brandId, fileName, categoryId }) {
@@ -89,7 +89,29 @@ class ProductService {
       throw ApiError.badRequest('Продукты еще не добавлены');
     }
 
-    return products;
+    const awwew = () => {
+      console.log('sss');
+    };
+
+    const fullProducts = [];
+    for (const product of products) {
+      const brand = await Brand.findOne({ where: { id: product.brandId } });
+      const category = await Category.findOne({ where: { id: product.categoryId } });
+
+      const productDto = new ProductDto({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        price_with_card: product.price_with_card,
+        weight: product.weight,
+        brand: brand.name,
+        category: category.name,
+        rating: product.rating,
+      });
+      fullProducts.push({ ...productDto });
+    }
+
+    return fullProducts;
   }
 }
 

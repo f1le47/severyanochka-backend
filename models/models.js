@@ -54,6 +54,11 @@ const Rating = sequelize.define('rating', {
   comment: { type: DataTypes.STRING },
 });
 
+const Discount = sequelize.define('discount', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  discount: { type: DataTypes.INTEGER, allowNull: false },
+});
+
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
@@ -78,6 +83,9 @@ Product.belongsTo(Category);
 Brand.belongsToMany(Category, { through: BrandCategory });
 Category.belongsToMany(Brand, { through: BrandCategory });
 
+Product.hasOne(Discount);
+Discount.belongsTo(Product);
+
 module.exports = {
   User,
   Basket,
@@ -87,4 +95,5 @@ module.exports = {
   Category,
   BrandCategory,
   Rating,
+  Discount,
 };

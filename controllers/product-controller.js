@@ -1,7 +1,5 @@
 const ApiError = require('../errors/ApiError');
 const ProductService = require('../services/product-service');
-const uuid = require('uuid');
-const path = require('path');
 
 class ProductController {
   async getProduct(req, res, next) {
@@ -20,14 +18,10 @@ class ProductController {
   }
   async addProduct(req, res, next) {
     try {
-      const { name, price, priceWithCard, weight, brandId, categoryId } = req.body;
+      const { name, price, priceWithCard, weight, brandId, categoryId, discount } = req.body;
       const { img } = req.files;
-      let fileName = uuid.v4() + '.jpg';
-      if (img) {
-        await img.mv(path.resolve(__dirname, '..', 'static', fileName));
-      }
 
-      if (!price || !name || !priceWithCard || !weight || !brandId || !categoryId) {
+      if (!price || !name || !priceWithCard || !weight || !brandId || !categoryId || !img) {
         return next(ApiError.badRequest('Не указаны данные продукта'));
       }
 
@@ -37,8 +31,9 @@ class ProductController {
         priceWithCard,
         weight,
         brandId,
-        fileName,
+        img,
         categoryId,
+        discount,
       });
 
       return res.json({ message: 'Новый продукт успешно добавлен' });
@@ -48,15 +43,11 @@ class ProductController {
   }
   async changeProduct(req, res, next) {
     try {
-      const { price, name, id, priceWithCard, weight, brandId, categoryId } = req.body;
+      const { price, name, id, priceWithCard, weight, brandId, categoryId, discount } = req.body;
+      const { img } = req.files;
+
       if (!price || !name || !id || !priceWithCard || !weight || !brandId || !categoryId) {
         return next(ApiError.badRequest('Не указаны данные продукта'));
-      }
-      const { img } = req.files;
-      let fileName;
-      if (img) {
-        fileName = uuid.v4() + '.jpg';
-        await img.mv(__dirname + '..', 'static', fileName);
       }
 
       await ProductService.changeProduct({
@@ -67,7 +58,8 @@ class ProductController {
         weight,
         brandId,
         categoryId,
-        fileName,
+        img,
+        discount,
       });
 
       return res.json({ message: 'Продукт успешно изменен' });
@@ -102,6 +94,40 @@ class ProductController {
       const products = await ProductService.getProducts(page, amount);
 
       return res.json({ products });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async getDiscountProducts(req, res, next) {
+    try {
+      let { page, amount } = req.query;
+      if (!page) {
+        page = 1;
+      }
+      if (!amount) {
+        amount = 4;
+      }
+
+      const discountProducts = await ProductService.getDiscountProducts({ page, amount });
+
+      return res.json({ discountProducts });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async getLatestProducts(req, res, next) {
+    try {
+      let { page, amount } = req.query;
+      if (!page) {
+        page = 1;
+      }
+      if (!amount) {
+        amount = 4;
+      }
+
+      const latestProducts = await ProductService.getLatestProducts({ page, amount });
+
+      return res.json({ latestProducts });
     } catch (e) {
       next(e);
     }

@@ -8,16 +8,18 @@ module.exports = class ProductDto {
   category;
   rating;
   img;
+  discount;
 
-  constructor({ id, name, price, price_with_card, weight, category, rating, brand, img }) {
-    this.id = id;
-    this.name = name;
-    this.price = price;
-    this.price_with_card = price_with_card;
-    this.weight = weight;
-    this.category = category;
-    this.rating = rating;
-    this.brand = brand;
-    this.img = img;
+  constructor({ product }) {
+    this.id = product.id;
+    this.name = product.name;
+    this.price = product.price;
+    this.price_with_card = product.price_with_card;
+    this.weight = product.weight;
+    this.category = product.category;
+    this.rating = product.rating;
+    this.brand = product.brand;
+    this.img = product.img;
+    this.discount = product.discount;
   }
 };

@@ -28,8 +28,8 @@ const Product = sequelize.define('product', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
   price: { type: DataTypes.STRING, allowNull: false },
-  price_with_card: { type: DataTypes.STRING, allowNull: false },
   img: { type: DataTypes.STRING },
+  isDiscount: { type: DataTypes.BOOLEAN, defaultValue: false },
   weight: { type: DataTypes.STRING, allowNull: false },
   rating: { type: DataTypes.INTEGER, defaultValue: 0 },
 });
@@ -54,14 +54,23 @@ const Rating = sequelize.define('rating', {
   comment: { type: DataTypes.STRING },
 });
 
+const Favorite = sequelize.define('favorite', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
+const FavoriteProduct = sequelize.define('favorite_product', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
 const Discount = sequelize.define('discount', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   discount: { type: DataTypes.INTEGER, allowNull: false },
+  priceWithCard: { type: DataTypes.STRING, allowNull: false },
 });
 
 const Article = sequelize.define('article', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  title: { type: DataTypes.STRING, allowNull: false, unique: true},
+  title: { type: DataTypes.STRING, allowNull: false, unique: true },
   article_text: { type: DataTypes.STRING, allowNull: false },
   img: { type: DataTypes.STRING, allowNull: false },
 });
@@ -93,6 +102,15 @@ Category.belongsToMany(Brand, { through: BrandCategory });
 Product.hasOne(Discount);
 Discount.belongsTo(Product);
 
+User.hasOne(Favorite);
+Favorite.belongsTo(User);
+
+Favorite.hasMany(FavoriteProduct);
+FavoriteProduct.belongsTo(Favorite);
+
+Product.hasMany(FavoriteProduct);
+FavoriteProduct.belongsTo(Product);
+
 module.exports = {
   User,
   Basket,
@@ -104,4 +122,6 @@ module.exports = {
   Rating,
   Discount,
   Article,
+  Favorite,
+  FavoriteProduct,
 };

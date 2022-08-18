@@ -18,10 +18,10 @@ class ProductController {
   }
   async addProduct(req, res, next) {
     try {
-      const { name, price, priceWithCard, weight, brandId, categoryId, discount } = req.body;
+      const { name, price, weight, brandId, categoryId, discount, priceWithCard } = req.body;
       const { img } = req.files;
 
-      if (!price || !name || !priceWithCard || !weight || !brandId || !categoryId || !img) {
+      if (!price || !name || !weight || !brandId || !categoryId || !img) {
         return next(ApiError.badRequest('Не указаны данные продукта'));
       }
 
@@ -43,23 +43,21 @@ class ProductController {
   }
   async changeProduct(req, res, next) {
     try {
-      const { price, name, id, priceWithCard, weight, brandId, categoryId, discount } = req.body;
+      const { name, id, price, weight, brandId, categoryId } = req.body;
       const { img } = req.files;
 
-      if (!price || !name || !id || !priceWithCard || !weight || !brandId || !categoryId) {
+      if (!price || !name || !id || !weight || !brandId || !categoryId) {
         return next(ApiError.badRequest('Не указаны данные продукта'));
       }
 
       await ProductService.changeProduct({
-        price,
-        name,
         id,
-        priceWithCard,
+        name,
+        price,
         weight,
         brandId,
         categoryId,
         img,
-        discount,
       });
 
       return res.json({ message: 'Продукт успешно изменен' });

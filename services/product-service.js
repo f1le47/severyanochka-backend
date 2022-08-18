@@ -5,6 +5,7 @@ const DiscountProductDto = require('../dtos/discount-product-dto');
 const uuid = require('uuid');
 const path = require('path');
 const fs = require('fs');
+const discountService = require('./discount-service');
 
 class ProductService {
   async getProduct(id) {
@@ -18,7 +19,7 @@ class ProductService {
     return { ...productDto };
   }
 
-  async addProduct({ price, name, priceWithCard, weight, brandId, img, categoryId, discount }) {
+  async addProduct({ price, name, weight, brandId, img, categoryId, discount, priceWithCard }) {
     const candidate = await Product.findOne({ where: { name } });
     if (candidate) {
       throw ApiError.badRequest('Продукт с таким названием уже существует');
@@ -28,9 +29,8 @@ class ProductService {
     await img.mv(path.resolve(__dirname, '..', 'static', fileName));
 
     const product = await Product.create({
-      price,
       name,
-      price_with_card: priceWithCard,
+      price,
       weight,
       brandId,
       categoryId,
@@ -38,26 +38,18 @@ class ProductService {
     });
 
     if (discount) {
-      await Discount.create({
+      await discountService.addDiscountFromProduct({
         discount,
+        priceWithCard,
         productId: product.id,
       });
+      product.update({ isDiscount: true });
     }
 
     return product;
   }
 
-  async changeProduct({
-    price,
-    name,
-    id,
-    priceWithCard,
-    weight,
-    brandId,
-    img,
-    categoryId,
-    discount,
-  }) {
+  async changeProduct({ price, name, id, weight, brandId, img, categoryId }) {
     const product = await Product.findOne({ where: { id } });
     if (!product) {
       throw ApiError.badRequest('Продукта с таким ID не существует');
@@ -79,21 +71,11 @@ class ProductService {
     const result = await product.update({
       name,
       price,
-      price_with_card: priceWithCard,
       weight,
       brandId,
       categoryId,
       img: fileName,
     });
-
-    if (discount) {
-      const discountValue = await Discount.findOne({ where: { productId: product.id } });
-      if (!discountValue) {
-        return await Discount.create({ discount, productId: product.id });
-      }
-
-      await discountValue.update({ discount });
-    }
 
     return result;
   }
@@ -104,21 +86,26 @@ class ProductService {
       throw ApiError.badRequest('Продукта с таким ID не существует');
     }
 
-    const discount = await Discount.findOne({ where: { productId: product.id } });
-    if (discount) {
-      await discount.destroy();
+    if (product.isDiscount === true) {
+      discountService.deleteDiscountFromProduct({ productId: product.id });
     }
 
+    fs.unlink(path.resolve(__dirname, '..', 'static', product.img), (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
     const result = await product.destroy();
     return result;
   }
 
   async getProducts(page, amount) {
-    const skip = (Number(page) - 1) * Number(amount);
+    const skip = Number(page) * Number(amount) - Number(amount);
     const products = await Product.findAll({ offset: skip, limit: Number(amount) });
     if (products.length === 0) {
       throw ApiError.badRequest('Продукты еще не добавлены');
     }
+
 
     const fullProducts = [];
     products.forEach((product) => {
@@ -129,24 +116,25 @@ class ProductService {
     return fullProducts;
   }
   async getDiscountProducts({ page, amount }) {
-    const skip = (Number(page) - 1) * Number(amount);
-    const discounts = await Discount.findAll({ offset: skip, limit: Number(amount) });
-    if (discounts.length === 0) {
-      throw ApiError.badRequest('Продукты с акцией еще не добавлены');
-    }
+    const skip = Number(page) * Number(amount) - Number(amount);
+    const products = await Product.findAll({
+      offset: skip,
+      limit: Number(amount),
+      where: { isDiscount: true },
+    });
 
-    const products = [];
-    for (const discount of discounts) {
-      const product = await Product.findOne({ where: { id: discount.productId } });
+    const fullDiscountProducts = [];
+    for (const product of products) {
+      const discount = await Discount.findOne({ productId: product.id });
 
       const discountProductDto = new DiscountProductDto({ product, discount });
-      products.push({ ...discountProductDto });
+      fullDiscountProducts.push({ ...discountProductDto });
     }
 
-    return products;
+    return fullDiscountProducts;
   }
   async getLatestProducts({ page, amount }) {
-    const skip = (Number(page) - 1) * Number(amount);
+    const skip = Number(page) * Number(amount) - Number(amount);
     const products = await Product.findAll({
       offset: skip,
       limit: Number(amount),

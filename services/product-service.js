@@ -24,7 +24,7 @@ class ProductService {
       throw ApiError.badRequest('Продукт с таким названием уже существует');
     }
 
-    const fileName = uuid.v4() + '.jpg';
+    const fileName = 'products/' + uuid.v4() + '.jpg';
     await img.mv(path.resolve(__dirname, '..', 'static', fileName));
 
     const product = await Product.create({
@@ -67,7 +67,7 @@ class ProductService {
     if (!img) {
       fileName = product.img;
     } else {
-      fileName = uuid.v4() + '.jpg';
+      fileName = 'products/' + uuid.v4() + '.jpg';
       await img.mv(path.resolve(__dirname, '..', 'static', fileName));
       fs.unlink(path.resolve(__dirname, '..', 'static', product.img), (err) => {
         if (err) {

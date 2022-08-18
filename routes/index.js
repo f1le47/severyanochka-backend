@@ -6,11 +6,13 @@ const productRouter = require('./productRouter');
 const ratingRouter = require('./ratingRouter');
 const brandRouter = require('./brandRouter');
 const categoryRouter = require('./categoryRouter');
+const articleRouter = require('./articleRouter');
 
 router.use('/user', userRouter);
 router.use('/products', productRouter);
 router.use('/rating', ratingRouter);
 router.use('/brand', brandRouter);
 router.use('/category', categoryRouter);
+router.use('/articles', articleRouter);
 
 module.exports = router;

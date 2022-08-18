@@ -59,6 +59,13 @@ const Discount = sequelize.define('discount', {
   discount: { type: DataTypes.INTEGER, allowNull: false },
 });
 
+const Article = sequelize.define('article', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  title: { type: DataTypes.STRING, allowNull: false, unique: true},
+  article_text: { type: DataTypes.STRING, allowNull: false },
+  img: { type: DataTypes.STRING, allowNull: false },
+});
+
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
@@ -96,4 +103,5 @@ module.exports = {
   BrandCategory,
   Rating,
   Discount,
+  Article,
 };

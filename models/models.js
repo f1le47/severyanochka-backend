@@ -108,7 +108,7 @@ Favorite.belongsTo(User);
 Favorite.hasMany(FavoriteProduct);
 FavoriteProduct.belongsTo(Favorite);
 
-Product.hasMany(FavoriteProduct);
+Product.hasOne(FavoriteProduct);
 FavoriteProduct.belongsTo(Product);
 
 module.exports = {

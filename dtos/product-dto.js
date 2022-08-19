@@ -4,8 +4,9 @@ module.exports = class ProductDto {
   price;
   weight;
   isDiscount;
-  brandId;
-  categoryId;
+  brand;
+  category;
+  discount;
   rating;
   img;
 
@@ -15,8 +16,9 @@ module.exports = class ProductDto {
     this.price = product.price;
     this.weight = product.weight;
     this.isDiscount = product.isDiscount;
-    this.brandId = product.brandId;
-    this.categoryId = product.categoryId;
+    this.brand = product.brand;
+    this.category = product.category;
+    this.discount = product.discount;
     this.rating = product.rating;
     this.img = product.img;
   }

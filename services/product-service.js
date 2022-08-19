@@ -1,5 +1,5 @@
 const ApiError = require('../errors/ApiError');
-const { Product, Discount } = require('../models/models');
+const { Product, Discount, Brand, Category } = require('../models/models');
 const ProductDto = require('../dtos/product-dto');
 const DiscountProductDto = require('../dtos/discount-product-dto');
 const uuid = require('uuid');
@@ -9,7 +9,10 @@ const discountService = require('./discount-service');
 
 class ProductService {
   async getProduct(id) {
-    const product = await Product.findOne({ where: { id } });
+    const product = await Product.findOne({
+      where: { id },
+      include: [{ model: Brand }, { model: Category }, { model: Discount }],
+    });
     if (!product) {
       throw ApiError.badRequest('Продукта с таким ID не существует');
     }
@@ -101,11 +104,14 @@ class ProductService {
 
   async getProducts(page, amount) {
     const skip = Number(page) * Number(amount) - Number(amount);
-    const products = await Product.findAll({ offset: skip, limit: Number(amount) });
+    const products = await Product.findAll({
+      offset: skip,
+      limit: Number(amount),
+      include: [{ model: Brand }, { model: Category }, { model: Discount }],
+    });
     if (products.length === 0) {
       throw ApiError.badRequest('Продукты еще не добавлены');
     }
-
 
     const fullProducts = [];
     products.forEach((product) => {
@@ -121,13 +127,12 @@ class ProductService {
       offset: skip,
       limit: Number(amount),
       where: { isDiscount: true },
+      include: [{ model: Brand }, { model: Category }, { model: Discount }],
     });
 
     const fullDiscountProducts = [];
     for (const product of products) {
-      const discount = await Discount.findOne({ productId: product.id });
-
-      const discountProductDto = new DiscountProductDto({ product, discount });
+      const discountProductDto = new ProductDto({ product });
       fullDiscountProducts.push({ ...discountProductDto });
     }
 
@@ -139,6 +144,7 @@ class ProductService {
       offset: skip,
       limit: Number(amount),
       order: [['createdAt', 'DESC']],
+      include: [{ model: Brand }, { model: Category }, { model: Discount }],
     });
 
     if (products.length === 0) {

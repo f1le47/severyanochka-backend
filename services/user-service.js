@@ -6,6 +6,7 @@ const TokenService = require('./token-service');
 const HttpRequests = require('../http/index');
 const bcrypt = require('bcrypt');
 const creatingActivationCode = require('../utils/creatingActivationCode');
+const favoriteService = require('./favoriteService');
 
 class UserService {
   async registration(phoneNumber, surname, name, password, birthday, region, city, gender) {
@@ -18,21 +19,19 @@ class UserService {
     const hashPassword = await bcrypt.hash(password, 5);
     const activationCode = creatingActivationCode();
 
-    try {
-      await User.create({
-        phoneNumber: formattedPhoneNumber,
-        name,
-        surname,
-        password: hashPassword,
-        birthday,
-        region,
-        city,
-        gender,
-        activationCode,
-      });
-    } catch (e) {
-      throw ApiError.internal();
-    }
+    const user = await User.create({
+      phoneNumber: formattedPhoneNumber,
+      name,
+      surname,
+      password: hashPassword,
+      birthday,
+      region,
+      city,
+      gender,
+      activationCode,
+    });
+
+    await favoriteService.createFavorite({ userId: user.id });
 
     // Sending SMS on mobile phone
     try {

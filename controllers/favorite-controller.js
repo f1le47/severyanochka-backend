@@ -32,12 +32,12 @@ class FavoriteController {
   }
   async getFavorites(req, res, next) {
     try {
-      const { userId } = req.query;
-      if (!userId) {
+      const { id } = req.user;
+      if (!id) {
         return next(ApiError.badRequest('Укажите ID пользователя'));
       }
 
-      const favorites = await favoriteService.getFavorites({ userId });
+      const favorites = await favoriteService.getFavorites({ userId: id });
 
       return res.json({ favorites });
     } catch (e) {

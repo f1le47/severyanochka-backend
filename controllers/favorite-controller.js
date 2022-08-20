@@ -4,12 +4,13 @@ const favoriteService = require('../services/favoriteService');
 class FavoriteController {
   async addFavoriteProduct(req, res, next) {
     try {
-      const { userId, productId } = req.body;
-      if (!userId || !productId) {
+      const { productId } = req.body;
+      const { id } = req.user;
+      if (!productId) {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await favoriteService.addFavoriteProduct({ userId, productId });
+      await favoriteService.addFavoriteProduct({ userId: id, productId });
 
       return res.json({ message: 'Продукт успешно добавлен в избранное' });
     } catch (e) {

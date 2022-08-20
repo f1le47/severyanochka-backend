@@ -148,12 +148,13 @@ class UserService {
   }
 
   async refresh(refreshToken) {
-    const decoded = TokenService.validateRefreshToken(refreshToken);
+    const decoded = await TokenService.validateRefreshToken(refreshToken);
     if (!decoded) {
       throw ApiError.unauthorized('Refresh token не валиден');
     }
 
-    const tokens = TokenService.generateTokens({ ...decoded });
+    const userDto = new UserDto(decoded);
+    const tokens = TokenService.generateTokens({ ...userDto });
 
     return tokens;
   }

@@ -39,15 +39,29 @@ class FavoriteService {
 
     return result;
   }
-  async getFavorites({ userId }) {
+  async getFavorites({ userId, page, amount }) {
     const favorite = await Favorite.findOne({ userId });
     if (!favorite) {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const favorites = await favorite_productService.getFavorites({ favoriteId: favorite.id });
+    const favorites = await favorite_productService.getFavorites({
+      favoriteId: favorite.id,
+      page,
+      amount,
+    });
 
     return favorites;
+  }
+  async getFavoritePages({ userId }) {
+    const favorite = await Favorite.findOne({ userId });
+    if (!favorite) {
+      throw ApiError.badRequest('У пользователя нет избранных');
+    }
+
+    const amountPages = await favorite_productService.getFavoritePages({ favoriteId: favorite.id });
+
+    return amountPages;
   }
 }
 

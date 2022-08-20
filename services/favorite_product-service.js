@@ -23,9 +23,12 @@ class FavoriteProductService {
 
     return result;
   }
-  async getFavorites({ favoriteId }) {
+  async getFavorites({ favoriteId, page, amount }) {
+    const skip = (page - 1) * amount;
     const favoriteProducts = await FavoriteProduct.findAll({
       where: { favoriteId },
+      offset: skip,
+      limit: Number(amount),
       include: [{ model: Product, include: [{ model: Brand }, { model: Category }] }],
     });
 
@@ -36,6 +39,11 @@ class FavoriteProductService {
     });
 
     return fullFavoriteProducts;
+  }
+  async getFavoritePages({ favoriteId }) {
+    const amountPages = await FavoriteProduct.count({ where: { favoriteId } });
+
+    return amountPages;
   }
 }
 

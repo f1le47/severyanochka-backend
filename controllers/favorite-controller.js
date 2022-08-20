@@ -18,12 +18,13 @@ class FavoriteController {
   }
   async removeFavoriteProduct(req, res, next) {
     try {
-      const { userId, productId } = req.query;
-      if (!userId || !productId) {
+      const { id } = req.user;
+      const { productId } = req.query;
+      if (!productId) {
         next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await favoriteService.removeFavoriteProduct({ userId, productId });
+      await favoriteService.removeFavoriteProduct({ userId: id, productId });
 
       return res.json({ message: 'Продукт успешно удален из списка избранных' });
     } catch (e) {
@@ -33,13 +34,25 @@ class FavoriteController {
   async getFavorites(req, res, next) {
     try {
       const { id } = req.user;
-      if (!id) {
-        return next(ApiError.badRequest('Укажите ID пользователя'));
-      }
 
-      const favorites = await favoriteService.getFavorites({ userId: id });
+      let { page, amount } = req.query;
+      !page && (page = 1);
+      !amount && (amount = 6);
+
+      const favorites = await favoriteService.getFavorites({ userId: id, page, amount });
 
       return res.json({ favorites });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async getFavoritePages(req, res, next) {
+    try {
+      const { id } = req.user;
+
+      const amountPages = await favoriteService.getFavoritePages({ userId: id });
+
+      return res.json({ amountPages });
     } catch (e) {
       next(e);
     }

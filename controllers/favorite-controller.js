@@ -58,6 +58,17 @@ class FavoriteController {
       next(e);
     }
   }
+  async favoriteProductsIds(req, res, next) {
+    try {
+      const { id } = req.user;
+
+      const favoriteProductIds = await favoriteService.getFavoriteIds({ userId: id });
+
+      return res.json({ favoriteProductIds });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 module.exports = new FavoriteController();

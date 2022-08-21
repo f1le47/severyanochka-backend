@@ -150,7 +150,7 @@ class UserService {
   async refresh(refreshToken) {
     const decoded = await TokenService.validateRefreshToken(refreshToken);
     if (!decoded) {
-      throw ApiError.unauthorized('Refresh token не валиден');
+      throw ApiError.forbidden('Refresh token не валиден');
     }
 
     const userDto = new UserDto(decoded);

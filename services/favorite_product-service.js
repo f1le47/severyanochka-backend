@@ -1,4 +1,5 @@
 const FavoriteProductDto = require('../dtos/favorite-dto');
+const FavoriteProductIdDto = require('../dtos/favorite-product-id-dto');
 const ApiError = require('../errors/ApiError');
 const { FavoriteProduct, Product, Brand, Category } = require('../models/models');
 
@@ -44,6 +45,17 @@ class FavoriteProductService {
     const amountPages = await FavoriteProduct.count({ where: { favoriteId } });
 
     return amountPages;
+  }
+  async getFavoriteIds({ favoriteId }) {
+    const favoriteProductsIds = [];
+    const favoriteProducts = await FavoriteProduct.findAll({ where: { favoriteId } });
+
+    favoriteProducts.forEach((favoriteProduct) => {
+      const favoriteProductIdDto = new FavoriteProductIdDto({ favoriteProduct });
+      favoriteProductsIds.push({ ...favoriteProductIdDto });
+    });
+
+    return favoriteProductsIds;
   }
 }
 

@@ -156,7 +156,7 @@ class UserController {
     try {
       const { refreshToken } = req.cookies;
       if (!refreshToken) {
-        return next(ApiError.unauthorized());
+        return next(ApiError.forbidden('Авторизуйтесь'));
       }
 
       const tokens = await UserService.refresh(refreshToken);

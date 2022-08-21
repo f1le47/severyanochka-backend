@@ -10,7 +10,6 @@ module.exports = function (req, res, next) {
     if (!token) {
       res.status(403).json({ message: 'Не авторизован' });
     }
-    console.log(process.env.JWT_ACCESS_TOKEN);
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN);
     req.user = decoded;
     next();

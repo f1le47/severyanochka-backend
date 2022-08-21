@@ -63,6 +63,16 @@ class FavoriteService {
 
     return amountPages;
   }
+  async getFavoriteIds({ userId }) {
+    const favorite = await Favorite.findOne({ userId });
+    if (!favorite) {
+      throw ApiError.badRequest('У пользователя нет избранных');
+    }
+
+    const favoriteProductsIds = favorite_productService.getFavoriteIds({ favoriteId: favorite.id });
+
+    return favoriteProductsIds;
+  }
 }
 
 module.exports = new FavoriteService();

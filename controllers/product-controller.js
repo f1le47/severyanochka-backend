@@ -89,7 +89,7 @@ class ProductController {
         amount = 4;
       }
 
-      const products = await ProductService.getProducts(page, amount);
+      const products = await ProductService.getProducts({ page, amount });
 
       return res.json({ products });
     } catch (e) {

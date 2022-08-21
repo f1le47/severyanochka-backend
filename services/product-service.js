@@ -1,11 +1,19 @@
 const ApiError = require('../errors/ApiError');
-const { Product, Discount, Brand, Category } = require('../models/models');
+const {
+  Product,
+  Discount,
+  Brand,
+  Category,
+  User,
+  FavoriteProduct,
+  Favorite,
+} = require('../models/models');
 const ProductDto = require('../dtos/product-dto');
-const DiscountProductDto = require('../dtos/discount-product-dto');
 const uuid = require('uuid');
 const path = require('path');
 const fs = require('fs');
 const discountService = require('./discount-service');
+const tokenService = require('./token-service');
 
 class ProductService {
   async getProduct(id) {
@@ -101,9 +109,11 @@ class ProductService {
     const result = await product.destroy();
     return result;
   }
-
-  async getProducts(page, amount) {
+  async getProducts({ page, amount }) {
     const skip = Number(page) * Number(amount) - Number(amount);
+    const fullProducts = [];
+
+   
     const products = await Product.findAll({
       offset: skip,
       limit: Number(amount),
@@ -113,8 +123,8 @@ class ProductService {
       throw ApiError.badRequest('Продукты еще не добавлены');
     }
 
-    const fullProducts = [];
     products.forEach((product) => {
+      console.log(product.favorite_product);
       const productDto = new ProductDto({ product });
       fullProducts.push({ ...productDto });
     });

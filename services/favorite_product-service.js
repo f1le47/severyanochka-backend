@@ -25,7 +25,7 @@ class FavoriteProductService {
     return result;
   }
   async getFavorites({ favoriteId, page, amount }) {
-    const skip = (page - 1) * amount;
+    const skip = (Number(page) - 1) * Number(amount);
     const favoriteProducts = await FavoriteProduct.findAll({
       where: { favoriteId },
       offset: skip,

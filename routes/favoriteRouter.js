@@ -8,5 +8,6 @@ router.get('/favorites', authMiddleware, favoriteController.getFavorites);
 router.delete('/favorite', authMiddleware, favoriteController.removeFavoriteProduct);
 router.get('/favorite-pages', authMiddleware, favoriteController.getFavoritePages);
 router.get('/favorite-ids', authMiddleware, favoriteController.favoriteProductsIds);
+router.get('/favorite-categories', authMiddleware, favoriteController.getFavoriteCategories);
 
 module.exports = router;

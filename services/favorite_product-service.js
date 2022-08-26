@@ -1,3 +1,4 @@
+const CategoryDto = require('../dtos/category-dto');
 const FavoriteProductDto = require('../dtos/favorite-dto');
 const FavoriteProductIdDto = require('../dtos/favorite-product-id-dto');
 const ApiError = require('../errors/ApiError');
@@ -24,14 +25,33 @@ class FavoriteProductService {
 
     return result;
   }
-  async getFavorites({ favoriteId, page, amount }) {
+  async getFavorites({ favoriteId, page, amount, categoryId }) {
     const skip = (Number(page) - 1) * Number(amount);
-    const favoriteProducts = await FavoriteProduct.findAll({
-      where: { favoriteId },
-      offset: skip,
-      limit: Number(amount),
-      include: [{ model: Product, include: [{ model: Brand }, { model: Category }] }],
-    });
+    let favoriteProducts;
+    let amountFavoriteProducts;
+    if (categoryId) {
+      favoriteProducts = await FavoriteProduct.findAll({
+        where: { favoriteId },
+        offset: skip,
+        limit: Number(amount),
+        include: [
+          {
+            model: Product,
+            where: { categoryId },
+            include: [{ model: Brand }, { model: Category }],
+          },
+        ],
+      });
+      amountFavoriteProducts = await FavoriteProduct.count({ where: { favoriteId } });
+    } else {
+      favoriteProducts = await FavoriteProduct.findAll({
+        where: { favoriteId },
+        offset: skip,
+        limit: Number(amount),
+        include: [{ model: Product, include: [{ model: Brand }, { model: Category }] }],
+      });
+      amountFavoriteProducts = await FavoriteProduct.count({ where: { favoriteId } });
+    }
 
     const fullFavoriteProducts = [];
     favoriteProducts.forEach((favoriteProduct) => {
@@ -39,7 +59,7 @@ class FavoriteProductService {
       fullFavoriteProducts.push({ ...favoriteDto });
     });
 
-    return fullFavoriteProducts;
+    return { amountFavoriteProducts, fullFavoriteProducts };
   }
   async getFavoritePages({ favoriteId }) {
     const amountPages = await FavoriteProduct.count({ where: { favoriteId } });
@@ -56,6 +76,26 @@ class FavoriteProductService {
     });
 
     return favoriteProductsIds;
+  }
+  async getFavoriteCategories({ favoriteId }) {
+    const favoriteProducts = await FavoriteProduct.findAll({
+      where: { favoriteId },
+      include: { model: Product, include: { model: Category } },
+    });
+
+    const favoriteCategories = [];
+    favoriteProducts.forEach((favoriteProduct) => {
+      const category = new CategoryDto({ favoriteProduct });
+      let alreadyInArr = false;
+      favoriteCategories.forEach((favoriteCategory) => {
+        if (favoriteCategory.id === category.id) {
+          alreadyInArr = true;
+        }
+      });
+      !alreadyInArr && favoriteCategories.push({ ...category });
+    });
+
+    return favoriteCategories;
   }
 }
 

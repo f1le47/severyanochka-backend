@@ -10,9 +10,9 @@ class FavoriteController {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await favoriteService.addFavoriteProduct({ userId: id, productId });
+      const favoriteProduct = await favoriteService.addFavoriteProduct({ userId: id, productId });
 
-      return res.json({ message: 'Продукт успешно добавлен в избранное' });
+      return res.json({ message: 'Продукт успешно добавлен в избранное', favoriteProduct });
     } catch (e) {
       next(e);
     }
@@ -25,9 +25,12 @@ class FavoriteController {
         next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await favoriteService.removeFavoriteProduct({ userId: id, productId });
+      const favoriteProduct = await favoriteService.removeFavoriteProduct({
+        userId: id,
+        productId,
+      });
 
-      return res.json({ message: 'Продукт успешно удален из списка избранных' });
+      return res.json({ message: 'Продукт успешно удален из списка избранных', favoriteProduct });
     } catch (e) {
       next(e);
     }
@@ -36,13 +39,21 @@ class FavoriteController {
     try {
       const { id } = req.user;
 
-      let { page, amount } = req.query;
+      let { page, amount, categoryId } = req.query;
       !page && (page = 1);
       !amount && (amount = 6);
 
-      const favorites = await favoriteService.getFavorites({ userId: id, page, amount });
+      const favorites = await favoriteService.getFavorites({
+        userId: id,
+        page,
+        amount,
+        categoryId,
+      });
 
-      return res.json({ favorites });
+      return res.json({
+        favoriteProducts: favorites.fullFavoriteProducts,
+        amountFavoriteProducts: favorites.amountFavoriteProducts,
+      });
     } catch (e) {
       next(e);
     }
@@ -65,6 +76,17 @@ class FavoriteController {
       const favoriteProductIds = await favoriteService.getFavoriteIds({ userId: id });
 
       return res.json({ favoriteProductIds });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async getFavoriteCategories(req, res, next) {
+    try {
+      const { id } = req.user;
+
+      const favoriteCategories = await favoriteService.getFavoriteCategories({ userId: id });
+
+      return res.json({ favoriteCategories });
     } catch (e) {
       next(e);
     }

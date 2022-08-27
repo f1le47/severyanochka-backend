@@ -31,6 +31,8 @@ class FavoriteProductService {
   async getFavorites({ favoriteId, page, amount, categoryId, min, max }) {
     const skip = (Number(page) - 1) * Number(amount);
     let favoriteProducts;
+    let allFavoriteProducts;
+    let amountFavoriteProducts = 0;
 
     if (categoryId) {
       if (min || max) {
@@ -46,6 +48,16 @@ class FavoriteProductService {
             },
           ],
         });
+
+        allFavoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          include: [
+            {
+              model: Product,
+              where: { price: { [Op.between]: [min, max] }, categoryId },
+            },
+          ],
+        });
       } else {
         favoriteProducts = await FavoriteProduct.findAll({
           where: { favoriteId },
@@ -56,6 +68,16 @@ class FavoriteProductService {
               model: Product,
               where: { categoryId },
               include: [{ model: Brand }, { model: Category }],
+            },
+          ],
+        });
+
+        allFavoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          include: [
+            {
+              model: Product,
+              where: { categoryId },
             },
           ],
         });
@@ -74,6 +96,16 @@ class FavoriteProductService {
             },
           ],
         });
+
+        allFavoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          include: [
+            {
+              model: Product,
+              where: { price: { [Op.between]: [min, max] } },
+            },
+          ],
+        });
       } else {
         favoriteProducts = await FavoriteProduct.findAll({
           where: { favoriteId },
@@ -81,16 +113,22 @@ class FavoriteProductService {
           limit: Number(amount),
           include: [{ model: Product, include: [{ model: Brand }, { model: Category }] }],
         });
+
+        allFavoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+        });
       }
     }
-
-    const amountFavoriteProducts = await FavoriteProduct.count({ where: { favoriteId } });
 
     const fullFavoriteProducts = [];
     favoriteProducts.forEach((favoriteProduct) => {
       const favoriteDto = new FavoriteProductDto({ favoriteProduct });
 
       fullFavoriteProducts.push({ ...favoriteDto });
+    });
+
+    allFavoriteProducts.forEach((favorite) => {
+      amountFavoriteProducts = amountFavoriteProducts + 1;
     });
 
     return { amountFavoriteProducts, fullFavoriteProducts };

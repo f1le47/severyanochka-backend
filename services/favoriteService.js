@@ -39,7 +39,7 @@ class FavoriteService {
 
     return result;
   }
-  async getFavorites({ userId, page, amount, categoryId }) {
+  async getFavorites({ userId, page, amount, categoryId, min, max }) {
     const favorite = await Favorite.findOne({ userId });
     if (!favorite) {
       throw ApiError.badRequest('У пользователя нет избранных');
@@ -50,6 +50,8 @@ class FavoriteService {
       page,
       amount,
       categoryId,
+      min,
+      max,
     });
 
     return favorites;

@@ -39,7 +39,7 @@ class FavoriteController {
     try {
       const { id } = req.user;
 
-      let { page, amount, categoryId } = req.query;
+      let { page, amount, categoryId, min, max } = req.query;
       !page && (page = 1);
       !amount && (amount = 6);
 
@@ -48,11 +48,15 @@ class FavoriteController {
         page,
         amount,
         categoryId,
+        min,
+        max,
       });
 
       return res.json({
         favoriteProducts: favorites.fullFavoriteProducts,
         amountFavoriteProducts: favorites.amountFavoriteProducts,
+        minPrice: favorites.minPrice,
+        maxPrice: favorites.maxPrice,
       });
     } catch (e) {
       next(e);

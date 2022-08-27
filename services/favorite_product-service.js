@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const CategoryDto = require('../dtos/category-dto');
 const FavoriteProductDto = require('../dtos/favorite-dto');
 const FavoriteProductIdDto = require('../dtos/favorite-product-id-dto');
@@ -25,41 +26,86 @@ class FavoriteProductService {
 
     return result;
   }
-  async getFavorites({ favoriteId, page, amount, categoryId }) {
+  async getFavorites({ favoriteId, page, amount, categoryId, min, max }) {
     const skip = (Number(page) - 1) * Number(amount);
     let favoriteProducts;
-    let amountFavoriteProducts;
+
+    let minPrice = 0;
+    let maxPrice = 0;
+
     if (categoryId) {
-      favoriteProducts = await FavoriteProduct.findAll({
-        where: { favoriteId },
-        offset: skip,
-        limit: Number(amount),
-        include: [
-          {
-            model: Product,
-            where: { categoryId },
-            include: [{ model: Brand }, { model: Category }],
-          },
-        ],
-      });
-      amountFavoriteProducts = await FavoriteProduct.count({ where: { favoriteId } });
+      if (min || max) {
+        favoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          offset: skip,
+          limit: Number(amount),
+          include: [
+            {
+              model: Product,
+              where: { price: { [Op.between]: [min, max] }, categoryId },
+              include: [{ model: Brand }, { model: Category }],
+            },
+          ],
+        });
+      } else {
+        favoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          offset: skip,
+          limit: Number(amount),
+          include: [
+            {
+              model: Product,
+              where: { categoryId },
+              include: [{ model: Brand }, { model: Category }],
+            },
+          ],
+        });
+      }
     } else {
-      favoriteProducts = await FavoriteProduct.findAll({
-        where: { favoriteId },
-        offset: skip,
-        limit: Number(amount),
-        include: [{ model: Product, include: [{ model: Brand }, { model: Category }] }],
-      });
-      amountFavoriteProducts = await FavoriteProduct.count({ where: { favoriteId } });
+      if (min || max) {
+        favoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          offset: skip,
+          limit: Number(amount),
+          include: [
+            {
+              model: Product,
+              where: { price: { [Op.between]: [min, max] } },
+              include: [{ model: Brand }, { model: Category }],
+            },
+          ],
+        });
+      } else {
+        favoriteProducts = await FavoriteProduct.findAll({
+          where: { favoriteId },
+          offset: skip,
+          limit: Number(amount),
+          include: [{ model: Product, include: [{ model: Brand }, { model: Category }] }],
+        });
+      }
     }
+
+    const amountFavoriteProducts = await FavoriteProduct.count({ where: { favoriteId } });
 
     const fullFavoriteProducts = [];
     favoriteProducts.forEach((favoriteProduct) => {
       const favoriteDto = new FavoriteProductDto({ favoriteProduct });
+
+      if (favoriteDto.price < minPrice) {
+        minPrice = favoriteDto.price;
+      } else if (minPrice === 0) {
+        minPrice = favoriteDto.price;
+      }
+      if (favoriteDto.price > maxPrice) {
+        maxPrice = favoriteDto.price;
+      } else if (maxPrice === 0) {
+        maxPrice = favoriteDto.price;
+      }
+
       fullFavoriteProducts.push({ ...favoriteDto });
     });
 
-    return { amountFavoriteProducts, fullFavoriteProducts };
+    return { amountFavoriteProducts, fullFavoriteProducts, minPrice, maxPrice };
   }
   async getFavoritePages({ favoriteId }) {
     const amountPages = await FavoriteProduct.count({ where: { favoriteId } });

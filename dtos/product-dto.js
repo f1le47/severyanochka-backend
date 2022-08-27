@@ -13,7 +13,7 @@ module.exports = class ProductDto {
   constructor({ product }) {
     this.id = product.id;
     this.name = product.name;
-    this.price = product.price;
+    this.price = parseFloat(product.price);
     this.weight = product.weight;
     this.isDiscount = product.isDiscount;
     this.brand = product.brand;

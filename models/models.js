@@ -65,7 +65,7 @@ const FavoriteProduct = sequelize.define('favorite_product', {
 const Discount = sequelize.define('discount', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   discount: { type: DataTypes.INTEGER, allowNull: false },
-  priceWithCard: { type: DataTypes.STRING, allowNull: false },
+  priceWithCard: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
 });
 
 const Article = sequelize.define('article', {

@@ -1,4 +1,6 @@
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
+const { Sequelize } = require('../db');
 const CategoryDto = require('../dtos/category-dto');
 const FavoriteProductDto = require('../dtos/favorite-dto');
 const FavoriteProductIdDto = require('../dtos/favorite-product-id-dto');
@@ -29,9 +31,6 @@ class FavoriteProductService {
   async getFavorites({ favoriteId, page, amount, categoryId, min, max }) {
     const skip = (Number(page) - 1) * Number(amount);
     let favoriteProducts;
-
-    let minPrice = 0;
-    let maxPrice = 0;
 
     if (categoryId) {
       if (min || max) {
@@ -91,21 +90,10 @@ class FavoriteProductService {
     favoriteProducts.forEach((favoriteProduct) => {
       const favoriteDto = new FavoriteProductDto({ favoriteProduct });
 
-      if (favoriteDto.price < minPrice) {
-        minPrice = favoriteDto.price;
-      } else if (minPrice === 0) {
-        minPrice = favoriteDto.price;
-      }
-      if (favoriteDto.price > maxPrice) {
-        maxPrice = favoriteDto.price;
-      } else if (maxPrice === 0) {
-        maxPrice = favoriteDto.price;
-      }
-
       fullFavoriteProducts.push({ ...favoriteDto });
     });
 
-    return { amountFavoriteProducts, fullFavoriteProducts, minPrice, maxPrice };
+    return { amountFavoriteProducts, fullFavoriteProducts };
   }
   async getFavoritePages({ favoriteId }) {
     const amountPages = await FavoriteProduct.count({ where: { favoriteId } });
@@ -142,6 +130,34 @@ class FavoriteProductService {
     });
 
     return favoriteCategories;
+  }
+  async getMinMaxPrices({ favoriteId }) {
+    const favoriteProducts = await FavoriteProduct.findAll({
+      where: { favoriteId },
+      include: {
+        model: Product,
+        raw: true,
+      },
+    });
+
+    let minPrice = 0;
+    let maxPrice = 0;
+
+    favoriteProducts.forEach((favoriteProduct) => {
+      const price = parseFloat(favoriteProduct.product.price);
+      if (minPrice === 0) {
+        minPrice = price;
+      } else if (minPrice > price) {
+        minPrice = price;
+      }
+      if (maxPrice === 0) {
+        maxPrice = price;
+      } else if (maxPrice < price) {
+        maxPrice = price;
+      }
+    });
+
+    return { minPrice, maxPrice };
   }
 }
 

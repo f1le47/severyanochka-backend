@@ -95,6 +95,17 @@ class FavoriteController {
       next(e);
     }
   }
+  async getMinMaxPrices(req, res, next) {
+    try {
+      const { id } = req.user;
+
+      const minMaxPrices = await favoriteService.getMinMaxPrices({ userId: id });
+
+      return res.json({ minPrice: minMaxPrices.minPrice, maxPrice: minMaxPrices.maxPrice });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 module.exports = new FavoriteController();

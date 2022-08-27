@@ -88,6 +88,16 @@ class FavoriteService {
 
     return favoriteCategories;
   }
+  async getMinMaxPrices({ userId }) {
+    const favorite = await Favorite.findOne({ userId });
+    if (!favorite) {
+      throw ApiError.badRequest('У пользователя нет избранных');
+    }
+
+    const minMaxPrices = await favorite_productService.getMinMaxPrices({ favoriteId: favorite.id });
+
+    return minMaxPrices;
+  }
 }
 
 module.exports = new FavoriteService();

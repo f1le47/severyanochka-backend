@@ -1,6 +1,6 @@
 const ApiError = require('../errors/ApiError');
 const { Favorite, User, Product } = require('../models/models');
-const favorite_productService = require('./favorite_product-service');
+const favoriteProductService = require('./favorite-product-service');
 
 class FavoriteService {
   async createFavorite({ userId }) {
@@ -19,7 +19,7 @@ class FavoriteService {
     }
     const favorite = await Favorite.findOne({ where: { userId } });
 
-    const favoriteProduct = await favorite_productService.addFavoriteProduct({
+    const favoriteProduct = await favoriteProductService.addFavoriteProduct({
       favoriteId: favorite.id,
       productId,
     });
@@ -32,7 +32,7 @@ class FavoriteService {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const result = await favorite_productService.removeFavoriteProduct({
+    const result = await favoriteProductService.removeFavoriteProduct({
       favoriteId: favorite.id,
       productId,
     });
@@ -45,7 +45,7 @@ class FavoriteService {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const favorites = await favorite_productService.getFavorites({
+    const favorites = await favoriteProductService.getFavorites({
       favoriteId: favorite.id,
       page,
       amount,
@@ -62,7 +62,7 @@ class FavoriteService {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const amountPages = await favorite_productService.getFavoritePages({ favoriteId: favorite.id });
+    const amountPages = await favoriteProductService.getFavoritePages({ favoriteId: favorite.id });
 
     return amountPages;
   }
@@ -72,7 +72,7 @@ class FavoriteService {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const favoriteProductsIds = favorite_productService.getFavoriteIds({ favoriteId: favorite.id });
+    const favoriteProductsIds = favoriteProductService.getFavoriteIds({ favoriteId: favorite.id });
 
     return favoriteProductsIds;
   }
@@ -82,7 +82,7 @@ class FavoriteService {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const favoriteCategories = favorite_productService.getFavoriteCategories({
+    const favoriteCategories = favoriteProductService.getFavoriteCategories({
       favoriteId: favorite.id,
     });
 
@@ -94,7 +94,7 @@ class FavoriteService {
       throw ApiError.badRequest('У пользователя нет избранных');
     }
 
-    const minMaxPrices = await favorite_productService.getMinMaxPrices({ favoriteId: favorite.id });
+    const minMaxPrices = await favoriteProductService.getMinMaxPrices({ favoriteId: favorite.id });
 
     return minMaxPrices;
   }

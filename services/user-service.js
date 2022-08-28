@@ -7,6 +7,7 @@ const HttpRequests = require('../http/index');
 const bcrypt = require('bcrypt');
 const creatingActivationCode = require('../utils/creatingActivationCode');
 const favoriteService = require('./favoriteService');
+const basketService = require('./basket-service');
 
 class UserService {
   async registration(phoneNumber, surname, name, password, birthday, region, city, gender) {
@@ -32,6 +33,7 @@ class UserService {
     });
 
     await favoriteService.createFavorite({ userId: user.id });
+    await basketService.createBasket({ userId: user.id });
 
     // Sending SMS on mobile phone
     try {

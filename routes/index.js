@@ -9,6 +9,7 @@ const categoryRouter = require('./categoryRouter');
 const articleRouter = require('./articleRouter');
 const discountRouter = require('./discountRouter');
 const favoriteRouter = require('./favoriteRouter');
+const basketRouter = require('./basketRouter');
 
 router.use('/user', userRouter);
 router.use('/products', productRouter);
@@ -18,5 +19,6 @@ router.use('/category', categoryRouter);
 router.use('/articles', articleRouter);
 router.use('/discount', discountRouter);
 router.use('/favorite', favoriteRouter);
+router.use('/basket', basketRouter);
 
 module.exports = router;

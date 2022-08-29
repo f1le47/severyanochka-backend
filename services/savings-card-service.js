@@ -13,10 +13,17 @@ class SavingsCardService {
     return savingsCard;
   }
   async addPoints({ userId, amountPoints }) {
+    const user = await User.findOne({ id: userId });
+    if (!user) {
+      throw ApiError.badRequest('Пользователя с таким ID не существует');
+    }
+
     const savingsCard = await SavingsCard.findOne({ where: { userId } });
     if (!savingsCard) {
       throw ApiError.badRequest('У этого пользователя нет накопительной карты');
     }
+
+    await user.update({ haveSavingsCard: true });
 
     const result = await savingsCard.update({
       numberOfPoints: savingsCard.numberOfPoints + amountPoints,

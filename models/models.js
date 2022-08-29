@@ -14,6 +14,7 @@ const User = sequelize.define('user', {
   role: { type: DataTypes.STRING, defaultValue: 'USER' },
   activationCode: { type: DataTypes.INTEGER },
   isActivated: { type: DataTypes.BOOLEAN, defaultValue: false },
+  haveSavingsCard: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
 const SavingsCard = sequelize.define('savings_card', {

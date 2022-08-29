@@ -1,5 +1,6 @@
 const ApiError = require('../errors/ApiError');
 const UserService = require('../services/user-service');
+const FullUserDto = require('../dtos/full-user-dto');
 
 class UserController {
   async registration(req, res, next) {
@@ -134,19 +135,9 @@ class UserController {
 
       const user = await UserService.checkAuth(token);
 
-      return res.json({
-        user: {
-          phoneNumber: user.phoneNumber,
-          name: user.name,
-          surname: user.surname,
-          birthday: user.birthday,
-          region: user.region,
-          city: user.city,
-          gender: user.gender,
-          role: user.role,
-          isActivated: user.isActivated,
-        },
-      });
+      const userDto = new FullUserDto({ user });
+
+      return res.json({ user: { ...userDto } });
     } catch (e) {
       next(e);
     }

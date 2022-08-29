@@ -26,7 +26,7 @@ app.use(fileUpload({}));
 app.use('/api', router);
 
 // Must be last middleware
-// app.use(errorHandler);
+app.use(errorHandler);
 
 const start = async () => {
   try {

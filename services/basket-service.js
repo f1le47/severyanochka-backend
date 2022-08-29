@@ -14,13 +14,23 @@ class BasketService {
   async addBasketProduct({ userId, productId }) {
     const basket = await Basket.findOne({ where: { userId } });
 
-    await basketProductService.addBasketProduct({ basketId: basket.id, productId });
+    const response = await basketProductService.addBasketProduct({
+      basketId: basket.id,
+      productId,
+    });
+
+    return response;
   }
   async removeBasketProduct({ userId, productId }) {
     try {
       const basket = await Basket.findOne({ userId });
 
-      await basketProductService.removeBasketProduct({ basketId: basket.id, productId });
+      const response = await basketProductService.removeBasketProduct({
+        basketId: basket.id,
+        productId,
+      });
+
+      return response;
     } catch (e) {
       throw e;
     }
@@ -31,6 +41,15 @@ class BasketService {
     const basketProducts = await basketProductService.getBasketProducts({ basketId: basket.id });
 
     return basketProducts;
+  }
+  async getAmountBasketProducts({ userId }) {
+    const basket = await Basket.findOne({ userId });
+
+    const amountBasketProducts = await basketProductService.getAmountBasketProducts({
+      basketId: basket.id,
+    });
+
+    return amountBasketProducts;
   }
 }
 

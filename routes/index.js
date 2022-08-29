@@ -10,6 +10,7 @@ const articleRouter = require('./articleRouter');
 const discountRouter = require('./discountRouter');
 const favoriteRouter = require('./favoriteRouter');
 const basketRouter = require('./basketRouter');
+const savingsCardRouter = require('./savingsCardRouter');
 
 router.use('/user', userRouter);
 router.use('/products', productRouter);
@@ -20,5 +21,6 @@ router.use('/articles', articleRouter);
 router.use('/discount', discountRouter);
 router.use('/favorite', favoriteRouter);
 router.use('/basket', basketRouter);
+router.use('/savings-card', savingsCardRouter);
 
 module.exports = router;

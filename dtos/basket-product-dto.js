@@ -1,5 +1,5 @@
 module.exports = class BasketProductDto {
-  id;
+  productId;
   name;
   price;
   discount;
@@ -7,7 +7,7 @@ module.exports = class BasketProductDto {
   img;
 
   constructor({ basketProduct }) {
-    this.id = basketProduct.product.id;
+    this.productId = basketProduct.product.id;
     this.name = basketProduct.product.name;
     this.price = basketProduct.product.price;
     this.discount = basketProduct.product.discount;

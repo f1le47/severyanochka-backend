@@ -16,6 +16,11 @@ const User = sequelize.define('user', {
   isActivated: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
+const SavingsCard = sequelize.define('savings_card', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  numberOfPoints: { type: DataTypes.INTEGER, defaultValue: 0 },
+});
+
 const Basket = sequelize.define('basket', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 });
@@ -79,6 +84,9 @@ const Article = sequelize.define('article', {
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
+User.hasOne(SavingsCard);
+SavingsCard.belongsTo(User);
+
 User.hasMany(Rating);
 Rating.belongsTo(User);
 
@@ -125,4 +133,5 @@ module.exports = {
   Article,
   Favorite,
   FavoriteProduct,
+  SavingsCard,
 };

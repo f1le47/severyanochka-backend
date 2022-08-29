@@ -10,9 +10,9 @@ class BasketController {
         return next(ApiError.badRequest('Укажите ID продукта'));
       }
 
-      await basketService.addBasketProduct({ userId: id, productId });
+      const basketProduct = await basketService.addBasketProduct({ userId: id, productId });
 
-      return res.json({ message: 'Продукт успешно добавлен в корзину' });
+      return res.json({ message: 'Продукт успешно добавлен в корзину', basketProduct });
     } catch (e) {
       next(e);
     }
@@ -25,9 +25,9 @@ class BasketController {
         return next(ApiError.badRequest('Укажите ID продукта'));
       }
 
-      await basketService.removeBasketProduct({ userId: id, productId });
+      const basketProduct = await basketService.removeBasketProduct({ userId: id, productId });
 
-      return res.json({ message: 'Продукт успешно удален из корзины' });
+      return res.json({ message: 'Продукт успешно удален из корзины', basketProduct });
     } catch (e) {
       next(e);
     }
@@ -39,6 +39,17 @@ class BasketController {
       const basketProducts = await basketService.getBasketProducts({ userId: id });
 
       return res.json({ basketProducts });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async getAmountBasketProducts(req, res, next) {
+    try {
+      const { id } = req.user;
+
+      const amountBasketProducts = await basketService.getAmountBasketProducts({ userId: id });
+
+      return res.json({ amountBasketProducts });
     } catch (e) {
       next(e);
     }

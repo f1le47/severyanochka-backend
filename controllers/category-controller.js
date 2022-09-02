@@ -1,15 +1,16 @@
 const ApiError = require('../errors/ApiError');
-const CategoryService = require('../services/category-service');
+const categoryService = require('../services/category-service');
 
 class CategoryController {
   async addCategory(req, res, next) {
     try {
+      const { img } = req.files;
       const { name } = req.body;
       if (!name) {
         next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await CategoryService.addCategory({ name });
+      await categoryService.addCategory({ name, img });
 
       return res.json({ message: 'Категория успешно добавлена' });
     } catch (e) {
@@ -18,12 +19,13 @@ class CategoryController {
   }
   async changeCategory(req, res, next) {
     try {
+      const { img } = req.files;
       const { id, name } = req.body;
       if (!id || !name) {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await CategoryService.changeCategory({ id, name });
+      await categoryService.changeCategory({ id, name, img });
 
       return res.json({ message: 'Категория успешно изменена' });
     } catch (e) {
@@ -37,9 +39,18 @@ class CategoryController {
         return next(ApiError.badRequest('Укажите ID'));
       }
 
-      await CategoryService.deleteCategory({ id });
+      await categoryService.deleteCategory({ id });
 
       return res.json({ message: 'Категория успешно удалена' });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async getCategories(req, res, next) {
+    try {
+      const categories = await categoryService.getCategories();
+
+      return res.json({ categories });
     } catch (e) {
       next(e);
     }

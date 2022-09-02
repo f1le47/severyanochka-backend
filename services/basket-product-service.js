@@ -10,17 +10,25 @@ class BasketProductService {
     }
 
     const basketProduct = await BasketProduct.findOne({ where: { basketId, productId } });
-    let response;
     if (basketProduct) {
-      response = await basketProduct.update({ amount: basketProduct.amount + 1 });
+      await basketProduct.update({ amount: basketProduct.amount + 1 });
     } else {
-      response = await BasketProduct.create({ basketId, productId });
+      await BasketProduct.create({ basketId, productId });
     }
 
-    return response;
+    const response = await BasketProduct.findOne({
+      where: { basketId, productId },
+      include: [{ model: Product, include: [{ model: Discount }] }],
+    });
+
+    const basketProductDto = new BasketProductDto({ basketProduct: response });
+
+    return { ...basketProductDto };
   }
   async removeBasketProduct({ basketId, productId }) {
-    const basketProduct = await BasketProduct.findOne({ where: { basketId, productId } });
+    const basketProduct = await BasketProduct.findOne({
+      where: { basketId, productId },
+    });
     if (!basketProduct) {
       throw ApiError.badRequest('Такого продукта нет в корзине');
     }
@@ -32,7 +40,19 @@ class BasketProductService {
       response = await basketProduct.destroy();
     }
 
-    return response;
+    let returnValue;
+    if (Array.isArray(response)) {
+      returnValue = response;
+    } else {
+      const basketProduct = await BasketProduct.findOne({
+        where: { basketId, productId },
+        include: [{ model: Product, include: [{ model: Discount }] }],
+      });
+      const basketProductDto = new BasketProductDto({ basketProduct });
+      returnValue = { ...basketProductDto };
+    }
+
+    return returnValue;
   }
   async getBasketProducts({ basketId }) {
     const basketProducts = await BasketProduct.findAll({

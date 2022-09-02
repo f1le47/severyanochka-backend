@@ -1,5 +1,6 @@
 const { SavingsCard } = require('../models/models');
 const ApiError = require('../errors/ApiError');
+const SavingsCardDto = require('../dtos/savings-card-dto');
 
 class SavingsCardService {
   async createSavingsCard({ userId }) {
@@ -30,6 +31,15 @@ class SavingsCardService {
     });
 
     return result;
+  }
+  async getSavingsCard({ userId }) {
+    const savingsCard = await SavingsCard.findOne({ where: { userId } });
+    if (!savingsCard) {
+      throw ApiError.badRequest('У пользователя нет накопительной карты');
+    }
+
+    const savingsCardDto = new SavingsCardDto({ savingsCard });
+    return { ...savingsCardDto };
   }
 }
 

@@ -12,6 +12,17 @@ class SavingsCardController {
       next(e);
     }
   }
+  async getSavingsCard(req, res, next) {
+    try {
+      const { id } = req.user;
+
+      const savingsCard = await savingsCardService.getSavingsCard({ userId: id });
+
+      return res.json({ savingsCard });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 module.exports = new SavingsCardController();

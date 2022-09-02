@@ -157,7 +157,7 @@ class FavoriteProductService {
 
     const favoriteCategories = [];
     favoriteProducts.forEach((favoriteProduct) => {
-      const category = new CategoryDto({ favoriteProduct });
+      const category = new CategoryDto({ category: favoriteProduct.product.category });
       let alreadyInArr = false;
       favoriteCategories.forEach((favoriteCategory) => {
         if (favoriteCategory.id === category.id) {

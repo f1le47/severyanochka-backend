@@ -49,6 +49,7 @@ const Brand = sequelize.define('brand', {
 const Category = sequelize.define('category', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
+  img: { type: DataTypes.STRING },
 });
 
 const BrandCategory = sequelize.define('brand_category', {

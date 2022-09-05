@@ -55,6 +55,20 @@ class CategoryController {
       next(e);
     }
   }
+  async getByCategoryId(req, res, next) {
+    try {
+      const { id } = req.query;
+      if (!id) {
+        return ApiError.badRequest('Укажите ID категории');
+      }
+
+      const productsById = await categoryService.getByCategoryId({ id });
+
+      return res.json({ productsById });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 module.exports = new CategoryController();

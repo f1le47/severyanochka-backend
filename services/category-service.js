@@ -1,9 +1,10 @@
 const ApiError = require('../errors/ApiError');
-const { Category } = require('../models/models');
+const { Category, Product, Discount, Brand } = require('../models/models');
 const uuid = require('uuid');
 const path = require('path');
 const fs = require('fs');
 const CategoryDto = require('../dtos/category-dto');
+const ProductDto = require('../dtos/product-dto');
 
 class CategoryService {
   async addCategory({ name, img }) {
@@ -65,6 +66,22 @@ class CategoryService {
     });
 
     return fullCategories;
+  }
+  async getByCategoryId({ id }) {
+    const category = await Category.findOne({
+      where: { id },
+      include: [
+        { model: Product, include: [{ model: Discount }, { model: Brand }, { model: Category }] },
+      ],
+    });
+
+    const fullProducts = [];
+    category.products.forEach((product) => {
+      const productDto = new ProductDto({ product });
+      fullProducts.push({ ...productDto });
+    });
+
+    return fullProducts;
   }
 }
 

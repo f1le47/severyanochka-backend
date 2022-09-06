@@ -67,13 +67,35 @@ class CategoryService {
 
     return fullCategories;
   }
-  async getByCategoryId({ id }) {
-    const category = await Category.findOne({
-      where: { id },
-      include: [
-        { model: Product, include: [{ model: Discount }, { model: Brand }, { model: Category }] },
-      ],
-    });
+  async getByCategoryId({ id, page, amount, min, max }) {
+    const skip = (page - 1) * amount;
+
+    let category;
+    if (min && max) {
+      category = await Category.findOne({
+        where: { id },
+        offset: skip,
+        limit: amount,
+        include: [
+          {
+            model: Product,
+            where: { price: { [Op.between]: [min, max] } },
+            include: [{ model: Discount }, { model: Brand }, { model: Category }],
+          },
+        ],
+      });
+    } else {
+      category = await Category.findOne({
+        where: { id },
+        offset: skip,
+        limit: amount,
+        include: [
+          { model: Product, include: [{ model: Discount }, { model: Brand }, { model: Category }] },
+        ],
+      });
+    }
+
+    const amountProducts = await Product.count({ where: { categoryId: id } });
 
     const fullProducts = [];
     category.products.forEach((product) => {
@@ -81,7 +103,24 @@ class CategoryService {
       fullProducts.push({ ...productDto });
     });
 
-    return fullProducts;
+    return { fullProducts, amountProducts };
+  }
+  async getMinMaxPrices({ id }) {
+    const category = await Category.findOne({ where: { id }, include: [{ model: Product }] });
+
+    let minPrice = 0;
+    let maxPrice = 0;
+
+    category.products.forEach((product) => {
+      if (minPrice > product.price || minPrice === 0) {
+        minPrice = product.price;
+      }
+      if (maxPrice < product.price || maxPrice === 0) {
+        maxPrice = product.price;
+      }
+    });
+
+    return { minPrice, maxPrice };
   }
 }
 

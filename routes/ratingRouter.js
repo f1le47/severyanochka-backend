@@ -1,9 +1,10 @@
 const Router = require('express');
+const ratingController = require('../controllers/rating-controller');
 const router = new Router();
-const RatingController = require('../controllers/rating-controller');
 
-router.post('/add-rate', RatingController.addRate);
-router.put('/rate', RatingController.changeRate);
-router.delete('/rate', RatingController.deleteRate);
+router.post('/add-rate', ratingController.addRate);
+router.put('/rate', ratingController.changeRate);
+router.delete('/rate', ratingController.deleteRate);
+router.get('/rates', ratingController.getRatings);
 
 module.exports = router;

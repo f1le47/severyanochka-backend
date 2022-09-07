@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const CategoryDto = require('../dtos/category-dto');
 const ProductDto = require('../dtos/product-dto');
+const { Op } = require('sequelize');
 
 class CategoryService {
   async addCategory({ name, img }) {
@@ -69,7 +70,6 @@ class CategoryService {
   }
   async getByCategoryId({ id, page, amount, min, max }) {
     const skip = (page - 1) * amount;
-
     let category;
     if (min && max) {
       category = await Category.findOne({
@@ -95,10 +95,11 @@ class CategoryService {
       });
     }
 
-    const amountProducts = await Product.count({ where: { categoryId: id } });
+    let amountProducts = 0;
 
     const fullProducts = [];
     category.products.forEach((product) => {
+      amountProducts = amountProducts + 1;
       const productDto = new ProductDto({ product });
       fullProducts.push({ ...productDto });
     });
@@ -112,11 +113,12 @@ class CategoryService {
     let maxPrice = 0;
 
     category.products.forEach((product) => {
-      if (minPrice > product.price || minPrice === 0) {
-        minPrice = product.price;
+      const price = parseFloat(product.price);
+      if (minPrice > price || minPrice === 0) {
+        minPrice = price;
       }
-      if (maxPrice < product.price || maxPrice === 0) {
-        maxPrice = product.price;
+      if (maxPrice < price || maxPrice === 0) {
+        maxPrice = price;
       }
     });
 

@@ -2,6 +2,7 @@ const ApiError = require('../errors/ApiError');
 const { Product, User, Rating } = require('../models/models');
 const sequelize = require('../db');
 const recalculationRating = require('../utils/recalculationRating');
+const RatingDto = require('../dtos/rating-dto');
 
 class RatingService {
   async addRate({ userId, rate, comment, productId }) {
@@ -53,7 +54,7 @@ class RatingService {
     return result;
   }
 
-  async deleteRate({userId, productId}) {
+  async deleteRate({ userId, productId }) {
     const rating = await Rating.findOne({ where: { userId, productId } });
     if (!rating) {
       throw ApiError.badRequest('Такой оценки не существует');
@@ -64,6 +65,20 @@ class RatingService {
     await recalculationRating(productId);
 
     return result;
+  }
+
+  async getRatings({ productId }) {
+    const ratings = await Rating.findAll({ where: { productId }, include: [{ model: User }] });
+
+    const amountRatings = await Rating.count({ where: { productId } });
+
+    const fullRatings = [];
+    ratings.forEach((rating) => {
+      const ratingDto = new RatingDto({ rating });
+      fullRatings.push({ ...ratingDto });
+    });
+
+    return {fullRatings, amountRatings};
   }
 }
 

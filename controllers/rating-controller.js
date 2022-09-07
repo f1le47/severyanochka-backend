@@ -1,5 +1,5 @@
 const ApiError = require('../errors/ApiError');
-const RatingService = require('../services/rating-service');
+const ratingService = require('../services/rating-service');
 
 class RatingController {
   async addRate(req, res, next) {
@@ -9,7 +9,7 @@ class RatingController {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await RatingService.addRate({ userId, rate, productId, comment });
+      await ratingService.addRate({ userId, rate, productId, comment });
 
       return res.json({ message: 'Оценка успешно добавлена' });
     } catch (e) {
@@ -24,7 +24,7 @@ class RatingController {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await RatingService.changeRate({ userId, productId, rate, comment });
+      await ratingService.changeRate({ userId, productId, rate, comment });
 
       return res.json({ message: 'Оценка успешно изменена' });
     } catch (e) {
@@ -38,9 +38,21 @@ class RatingController {
       return next(ApiError.badRequest('Не указаны данные'));
     }
 
-    await RatingService.deleteRate({ userId, productId });
+    await ratingService.deleteRate({ userId, productId });
 
     return res.json({ message: 'Оценка успешно удалена' });
+  }
+
+  async getRatings(req, res, next) {
+    try {
+      const { productId } = req.query;
+
+      const ratings = await ratingService.getRatings({ productId });
+
+      return res.json({ ratings: ratings.fullRatings, amountRatings: ratings.amountRatings });
+    } catch (e) {
+      next(e);
+    }
   }
 }
 

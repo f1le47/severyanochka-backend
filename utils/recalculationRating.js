@@ -2,6 +2,9 @@ const { Rating, Product } = require('../models/models');
 
 async function recalculationRating(productId) {
   const ratings = await Rating.findAll({ where: { productId } });
+  if (ratings.length === 0) {
+    return null;
+  }
   let rates = 0;
   let ratesCount = 0;
   ratings.forEach((rating) => {

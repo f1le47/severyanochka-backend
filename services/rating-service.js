@@ -78,7 +78,7 @@ class RatingService {
       fullRatings.push({ ...ratingDto });
     });
 
-    return {fullRatings, amountRatings};
+    return { fullRatings, amountRatings };
   }
 }
 

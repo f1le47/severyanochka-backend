@@ -4,12 +4,13 @@ const ratingService = require('../services/rating-service');
 class RatingController {
   async addRate(req, res, next) {
     try {
-      const { userId, rate, comment, productId } = req.body;
-      if (!userId || !rate || !productId) {
+      const { id } = req.user;
+      const { rate, comment, productId } = req.body;
+      if (!rate || !productId) {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await ratingService.addRate({ userId, rate, productId, comment });
+      await ratingService.addRate({ userId: id, rate, productId, comment });
 
       return res.json({ message: 'Оценка успешно добавлена' });
     } catch (e) {
@@ -19,12 +20,13 @@ class RatingController {
 
   async changeRate(req, res, next) {
     try {
-      const { userId, productId, rate, comment } = req.body;
-      if (!userId || !productId || !rate) {
+      const { id } = req.user;
+      const { productId, rate, comment } = req.body;
+      if (!productId || !rate) {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await ratingService.changeRate({ userId, productId, rate, comment });
+      await ratingService.changeRate({ userId: id, productId, rate, comment });
 
       return res.json({ message: 'Оценка успешно изменена' });
     } catch (e) {
@@ -33,12 +35,13 @@ class RatingController {
   }
 
   async deleteRate(req, res, next) {
-    const { userId, productId } = req.query;
-    if (!userId || !productId) {
+    const { id } = req.user;
+    const { productId } = req.query;
+    if (!productId) {
       return next(ApiError.badRequest('Не указаны данные'));
     }
 
-    await ratingService.deleteRate({ userId, productId });
+    await ratingService.deleteRate({ userId: id, productId });
 
     return res.json({ message: 'Оценка успешно удалена' });
   }

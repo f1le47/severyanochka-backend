@@ -83,6 +83,14 @@ const Article = sequelize.define('article', {
   img: { type: DataTypes.STRING, allowNull: false },
 });
 
+const Job = sequelize.define('job', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  job_title: { type: DataTypes.STRING, allowNull: false, unique: true },
+  requirements: { type: DataTypes.STRING, allowNull: false },
+  responsibilities: { type: DataTypes.STRING, allowNull: false },
+  terms: { type: DataTypes.STRING, allowNull: false },
+});
+
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
@@ -136,4 +144,5 @@ module.exports = {
   Favorite,
   FavoriteProduct,
   SavingsCard,
+  Job,
 };

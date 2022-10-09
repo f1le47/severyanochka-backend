@@ -10,9 +10,9 @@ class RatingController {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await ratingService.addRate({ userId: id, rate, productId, comment });
+      const rating = await ratingService.addRate({ userId: id, rate, productId, comment });
 
-      return res.json({ message: 'Оценка успешно добавлена' });
+      return res.json({ message: 'Оценка успешно добавлена', rating });
     } catch (e) {
       next(e);
     }
@@ -26,9 +26,9 @@ class RatingController {
         return next(ApiError.badRequest('Не указаны данные'));
       }
 
-      await ratingService.changeRate({ userId: id, productId, rate, comment });
+      const rating = await ratingService.changeRate({ userId: id, productId, rate, comment });
 
-      return res.json({ message: 'Оценка успешно изменена' });
+      return res.json({ message: 'Оценка успешно изменена', rating });
     } catch (e) {
       next(e);
     }

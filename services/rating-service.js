@@ -31,7 +31,14 @@ class RatingService {
 
     await recalculationRating(productId);
 
-    return rating;
+    const fullRating = await Rating.findOne({
+      where: { productId, userId },
+      include: [{ model: User }],
+    });
+
+    const ratingDto = new RatingDto({ rating: fullRating });
+
+    return { ...ratingDto };
   }
 
   async changeRate({ userId, productId, rate, comment }) {
@@ -51,7 +58,14 @@ class RatingService {
 
     await recalculationRating(productId);
 
-    return result;
+    const fullRating = await Rating.findOne({
+      where: { productId, userId },
+      include: [{ model: User }],
+    });
+
+    const ratingDto = new RatingDto({ rating: fullRating });
+
+    return { ...ratingDto };
   }
 
   async deleteRate({ userId, productId }) {
